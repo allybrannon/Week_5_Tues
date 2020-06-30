@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Star Wars Movies</title>
+    <style>
+        body {
+            
+            background: url(bg.jpg) no-repeat center center fixed;            
+            background-size: cover;
+        }
+
+        .content {
+            display: flex;
+            justify-content: center;
+        }
+        .movies {
+            width:800px;
+            background: rgba(120,120,120,0.8);
+            border-radius: 3px;
+            padding:20px;
+            
+        }
+        .movie {
+            text-align: center;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .hidden {
+            display: none;
+        }
+
+        .title {
+            font-weight:bold;
+            font-size: 4rem;
+            cursor: pointer;
+            padding:4px;
+            text-align: center;
+            font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+        }
+
+        .crawl {
+            width:700px;
+            text-align: center;
+            height:300px;
+            font-size:2rem;
+            color:yellow;
+            background: black;
+            overflow-y: hidden;
+            font-family: Arial, Helvetica, sans-serif;
+            border-radius: 6px;
+            box-shadow: #333 10px 10px 10px;
+        }
+        h1 {
+            border-bottom: 1px solid;
+            font-family: sans-serif;
+            font-size:2.2rem;
+            text-align: center;
+            color:white;
+            background-color: rgba(20,20,20,.8);
+        }
+    </style>
+</head>
+<body>
+    <button id="loadMovies">Load Movies</button>
+    <h1>Star Wars Movies</h1>
+    <div class="content">
+        <div class="movies" id="movies"></div>
+    </div>
+    <script src="ajax.js"></script>
+    <script>
+
+        let interval = null;
+
+        const startScroll = (element) =>{
+
+            const scroll = ()=>{
+                if(element.scrollTop<(element.scrollHeight-element.offsetHeight)){-1
+                    element.scrollTop=element.scrollTop+1
+                }
+                else {element.scrollTop=0;}
+            }
+
+            return setInterval(scroll,80)
+        }
+
+        const createMoveDom = (movieData) =>{
+            let movie = document.createElement("div");
+            movie.className = "movie";
+
+            let name = document.createElement("div");
+            name.innerHTML = movieData.title;
+            name.className = "title";
+
+            let crawl = document.createElement("div");
+            crawl.innerText = movieData.opening_crawl;
+            crawl.className = "crawl hidden";
+
+            name.addEventListener("click", (evt)=>{
+                if(interval) {
+                    clearInterval(interval)
+                }
+                //add hidden to all 
+                document.querySelectorAll(".crawl").forEach(c=>{
+                    c.classList.remove("hidden")
+                    c.classList.add("hidden")
+                })
+                console.log('movie');
+                let crawl = movie.querySelector(".crawl");
+                crawl.classList.toggle("hidden");
+                if(!crawl.className.includes("hidden")){
+                    interval = startScroll(crawl)
+                }
+            })
+
+            movie.append(name,crawl);
+            return movie
+        }
+
+        const loadClicked = ()=>{
+            document.querySelector("#movies").append("Loading Data ...");
+            ajax('https://swapi.dev/api/films/', loadMovies);
+        }
+
+        const loadMovies = (moviesJSON) =>{
+            const movieContainer = document.querySelector("#movies");
+            movieContainer.innerHTML = "";
+            let movies = JSON.parse(moviesJSON);
+            
+            let moviesDom = movies.results.map(movie=>createMoveDom(movie))
+            moviesDom.forEach(movie=>movieContainer.append(movie))
+        }
+
+        document.querySelector("#loadMovies").addEventListener("click", loadClicked);
+
+    </script>
+</body>
+</html>

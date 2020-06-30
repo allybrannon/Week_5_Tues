@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      .name {
+        cursor: pointer;
+        padding: 4px;
+      }
+      .name:hover {
+        text-decoration: underline;
+      }
+      .hidden {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <ul id="starwars-people"></ul>
+    <script src="ajax.js"></script>
+    <script>
+      let container = document.querySelector("#starwars-people");
+
+      const createDomPerson = (person) => {
+        let li = document.createElement("li");
+        li.className = "person";
+
+        let name = document.createElement("div");
+        name.innerText = person.name;
+        name.className = "name";
+
+        let details = document.createElement("ul");
+        details.innerHTML = `
+                ${Object.keys(person)
+                  .filter((detail) => detail !== "name")
+                  .map((detail) => `<li>${detail} : ${person[detail]}</li>`)
+                  .join("")}
+            `;
+        details.className = "details hidden";
+
+        name.addEventListener("click", (evt) => {
+          evt.target.nextSibling.classList.toggle("hidden");
+        });
+
+        li.append(name, details);
+        container.append(li);
+      };
+
+      ajax("./starwars_names.json", (resp) => {
+        let people = JSON.parse(resp);
+        console.log(people);
+        people.forEach((person) => createDomPerson(person));
+      });
+    </script>
+  </body>
+</html>
